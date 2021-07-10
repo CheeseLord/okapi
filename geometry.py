@@ -50,3 +50,32 @@ class Bezier:
 
         return cls(p0, p1, p2, p3)
 
+    def split(self, t: float) -> Tuple['Bezier', 'Bezier']:
+        """
+        Split a bezier curve at a point.
+        """
+
+        # Use the de Casteljau algorithm.
+        a = Bezier(
+            self.p0,
+            (1 - t) * self.p0 + t * self.p1,
+            (
+                (1 - t) ** 2 * self.p0
+                + 2 * t * (1 - t) * self.p1
+                + t ** 2 * self.p2
+            ),
+            self(t),
+        )
+        b = Bezier(
+            self(t),
+            (
+                (1 - t) ** 2 * self.p1
+                + 2 * t * (1 - t) * self.p2
+                + t ** 2 * self.p3
+            ),
+            (1 - t) * self.p2 + t * self.p3,
+            self.p3,
+        )
+
+        return (a, b)
+

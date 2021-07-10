@@ -70,9 +70,33 @@ class Canvas(QtWidgets.QWidget):
 
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
+
         painter.setPen(QtCore.Qt.red)
         path = QtGui.QPainterPath()
         path.moveTo(*self.curve.p0)
         path.cubicTo(*self.curve.p1, *self.curve.p2, *self.curve.p3)
+        painter.drawPath(path)
+
+        left, right = self.curve.split(0.3)
+        offset = np.array([0, 0])
+
+        painter.setPen(QtCore.Qt.blue)
+        path = QtGui.QPainterPath()
+        path.moveTo(*(left.p0 + offset))
+        path.cubicTo(
+            *(left.p1 + offset),
+            *(left.p2 + offset),
+            *(left.p3 + offset),
+        )
+        painter.drawPath(path)
+
+        painter.setPen(QtCore.Qt.green)
+        path = QtGui.QPainterPath()
+        path.moveTo(*(right.p0 + offset))
+        path.cubicTo(
+            *(right.p1 + offset),
+            *(right.p2 + offset),
+            *(right.p3 + offset),
+        )
         painter.drawPath(path)
 
