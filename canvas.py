@@ -1,8 +1,7 @@
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from geometry import bezierFromPoints
-
+from geometry import Bezier
 
 NUM_SEGMENTS = 1000
 MAX_DISTANCE = 20
@@ -13,10 +12,7 @@ class Canvas(QtWidgets.QWidget):
         super().__init__()
 
         # A bezier curve is defined by four control points.
-        self.p0 = np.array([100, 100])
-        self.p1 = np.array([200, 100])
-        self.p2 = np.array([300, 100])
-        self.p3 = np.array([400, 100])
+        self.curve = Bezier((100, 100), (200, 100), (300, 100), (400, 100))
 
         # Keep track of the points on the curve we're following.
         self.t1 = None
@@ -27,15 +23,10 @@ class Canvas(QtWidgets.QWidget):
     def mousePressEvent(self, event):
         mousePos = np.array([event.localPos().x(), event.localPos().y()])
         if event.buttons() & QtCore.Qt.LeftButton:
-            # Find the nearest point on the cuve (within the threshold).
+            # Find the nearest point on the curve (within the threshold).
             minDist = MAX_DISTANCE
             for t in np.linspace(0, 1, NUM_SEGMENTS + 1):
-                q = sum([
-                    (1 - t) ** 3 * self.p0,
-                    3 * t * (1 - t) ** 2 * self.p1,
-                    3 * t ** 2 * (1 - t) * self.p2,
-                    t ** 3 * self.p3,
-                ])
+                q = self.curve(t)
                 d = np.hypot(*(q - mousePos))
                 if d < minDist:
                     minDist = d
@@ -49,12 +40,7 @@ class Canvas(QtWidgets.QWidget):
                 self.t2 = (1 + self.t1) / 2
             else:
                 self.t2 = self.t1 / 2
-            self.q2 = sum([
-                (1 - self.t2) ** 3 * self.p0,
-                3 * self.t2 * (1 - self.t2) ** 2 * self.p1,
-                3 * self.t2 ** 2 * (1 - self.t2) * self.p2,
-                self.t2 ** 3 * self.p3,
-            ])
+            self.q2 = self.curve(self.t2)
 
         self.repaint()
 
@@ -75,8 +61,9 @@ class Canvas(QtWidgets.QWidget):
         r1 = np.array([event.localPos().x(), event.localPos().y()])
         r2 = self.q2 + (r1 - self.q1) / 2
 
-        self.p0, self.p1, self.p2, self.p3 = bezierFromPoints(
-            self.p0, r1, r2, self.p3, self.t1, self.t2
+        # TODO: This should update itself instead of creating a new curve.
+        self.curve = Bezier.fromPoints(
+            self.curve.p0, r1, r2, self.curve.p3, self.t1, self.t2
         )
 
         self.repaint()
@@ -85,7 +72,7 @@ class Canvas(QtWidgets.QWidget):
         painter = QtGui.QPainter(self)
         painter.setPen(QtCore.Qt.red)
         path = QtGui.QPainterPath()
-        path.moveTo(*self.p0)
-        path.cubicTo(*self.p1, *self.p2, *self.p3)
+        path.moveTo(*self.curve.p0)
+        path.cubicTo(*self.curve.p1, *self.curve.p2, *self.curve.p3)
         painter.drawPath(path)
 
