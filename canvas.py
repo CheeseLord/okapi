@@ -77,8 +77,16 @@ class Canvas(QtWidgets.QWidget):
         path.cubicTo(*self.curve.p1, *self.curve.p2, *self.curve.p3)
         painter.drawPath(path)
 
+        painter.setPen(QtCore.Qt.red)
+        painter.drawRect(self.curve.p1[0] - 5, self.curve.p1[1] - 5, 10, 10)
+        painter.drawRect(self.curve.p2[0] - 5, self.curve.p2[1] - 5, 10, 10)
+
+        (xMin, xMax), (yMin, yMax) = self.curve.boundingBox
+        painter.setPen(QtCore.Qt.black)
+        painter.drawRect(xMin, yMin, xMax - xMin, yMax - yMin)
+
         left, right = self.curve.split(0.3)
-        offset = np.array([0, 0])
+        offset = np.array([0, 100])
 
         painter.setPen(QtCore.Qt.blue)
         path = QtGui.QPainterPath()

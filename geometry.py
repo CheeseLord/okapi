@@ -79,3 +79,14 @@ class Bezier:
 
         return (a, b)
 
+    @property
+    def boundingBox(self) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+        # A bezier curve is a convex linear combination of control points, so
+        # the control points give a bounding box (not tight).
+
+        control = [self.p0, self.p1, self.p2, self.p3]
+        xMin, yMin = np.min(control, axis=0)
+        xMax, yMax = np.max(control, axis=0)
+
+        return ((xMin, xMax), (yMin, yMax))
+
