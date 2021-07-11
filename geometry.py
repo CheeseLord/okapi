@@ -1,11 +1,16 @@
 import numpy as np
-from typing import List, Tuple, Union
+from numpy.typing import ArrayLike
+from typing import Tuple
 
-Point = Union[List, Tuple, np.ndarray]
+# TODO: This will probably need to be a real class eventually.
+Point = np.ndarray
 
 
 class Bezier:
-    def __init__(self, p0: Point, p1: Point, p2: Point, p3: Point):
+    def __init__(
+        self,
+        p0: ArrayLike, p1: ArrayLike, p2: ArrayLike, p3: ArrayLike,
+    ):
         self.p0 = np.array(p0)
         self.p1 = np.array(p1)
         self.p2 = np.array(p2)
@@ -27,7 +32,7 @@ class Bezier:
     @classmethod
     def fromPoints(
             cls,
-            p0: Point, q1: Point, q2: Point, p3: Point,
+            p0: ArrayLike, q1: ArrayLike, q2: ArrayLike, p3: ArrayLike,
             t1: float, t2: float,
         ) -> 'Bezier':
         """
