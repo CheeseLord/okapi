@@ -1,7 +1,7 @@
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from geometry import Bezier
+from geometry import Bezier, intersect
 
 NUM_SEGMENTS = 1000
 MAX_DISTANCE = 20
@@ -77,34 +77,30 @@ class Canvas(QtWidgets.QWidget):
         path.cubicTo(*self.curve.p1, *self.curve.p2, *self.curve.p3)
         painter.drawPath(path)
 
-        painter.setPen(QtCore.Qt.red)
-        painter.drawRect(self.curve.p1[0] - 5, self.curve.p1[1] - 5, 10, 10)
-        painter.drawRect(self.curve.p2[0] - 5, self.curve.p2[1] - 5, 10, 10)
-
-        (xMin, xMax), (yMin, yMax) = self.curve.boundingBox
-        painter.setPen(QtCore.Qt.black)
-        painter.drawRect(xMin, yMin, xMax - xMin, yMax - yMin)
-
         left, right = self.curve.split(0.3)
         offset = np.array([0, 100])
+        left.p0 += offset
+        left.p1 += offset
+        left.p2 += offset
+        left.p3 += offset
+        right.p0 += offset
+        right.p1 += offset
+        right.p2 += offset
+        right.p3 += offset
 
         painter.setPen(QtCore.Qt.blue)
         path = QtGui.QPainterPath()
-        path.moveTo(*(left.p0 + offset))
-        path.cubicTo(
-            *(left.p1 + offset),
-            *(left.p2 + offset),
-            *(left.p3 + offset),
-        )
+        path.moveTo(*left.p0)
+        path.cubicTo(*left.p1, *left.p2, *left.p3)
         painter.drawPath(path)
+        for x, y in intersect(self.curve, left):
+            painter.drawRect(x - 5, y - 5, 10, 10)
 
         painter.setPen(QtCore.Qt.green)
         path = QtGui.QPainterPath()
-        path.moveTo(*(right.p0 + offset))
-        path.cubicTo(
-            *(right.p1 + offset),
-            *(right.p2 + offset),
-            *(right.p3 + offset),
-        )
+        path.moveTo(*right.p0)
+        path.cubicTo(*right.p1, *right.p2, *right.p3)
         painter.drawPath(path)
+        for x, y in intersect(self.curve, right):
+            painter.drawRect(x - 5, y - 5, 10, 10)
 

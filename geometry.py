@@ -1,6 +1,10 @@
 import numpy as np
 from numpy.typing import ArrayLike
-from typing import Tuple
+from typing import List, Tuple
+
+
+INTERSECT_PRECISION = 1e-8
+
 
 # TODO: This will probably need to be a real class eventually.
 Point = np.ndarray
@@ -94,4 +98,37 @@ class Bezier:
         xMax, yMax = np.max(control, axis=0)
 
         return ((xMin, xMax), (yMin, yMax))
+
+
+def intersect(a: Bezier, b: Bezier) -> List[Point]:
+    """
+    Find the intersection of two bezier curves.
+    """
+
+    # TODO: This fails when the two curves are the same.
+
+    (aXMin, aXMax), (aYMin, aYMax) = a.boundingBox
+    (bXMin, bXMax), (bYMin, bYMax) = b.boundingBox
+
+    # If the bounding boxes don't intersect, the curves can't either.
+    if (aXMin > bXMax or aXMax < bXMin or aYMin > bYMax or aYMax < bYMin):
+        return []
+
+    # If the boxes are small enough, the curves intersect.
+    if (
+        (aXMax - aXMin) * (aYMax - aYMin)
+        + (bXMax - bXMin) * (bYMax - bYMin)
+    ) < INTERSECT_PRECISION:
+        # TODO: We could probably do better if we used b.
+        return [np.array([aXMin + aXMax, aYMin + aYMax]) / 2]
+
+    # Otherwise, split each curve in half and recurse.
+    aStart, aEnd = a.split(0.5)
+    bStart, bEnd = b.split(0.5)
+    return (
+        intersect(aStart, bStart)
+        + intersect(aStart, bEnd)
+        + intersect(aEnd, bStart)
+        + intersect(aEnd, bEnd)
+    )
 
