@@ -28,7 +28,7 @@ class Bezier:
 
         # TODO: Make this work with an array of t values.
         a0, a1, a2, a3 = self.coefficients
-        return (a0 + t * (a1 + t * (a2 + t * a3)))
+        return a0 + t * (a1 + t * (a2 + t * a3))
 
     @classmethod
     def fromPoints(
@@ -139,8 +139,24 @@ class Bezier:
 
     @property
     def selfIntersections(self) -> List[Point]:
-        # FIXME: Write this.
-        pass
+        _a0, (x1, y1), (x2, y2), (x3, y3) = self.coefficients
+
+        # Solve B(t1) = B(t2).
+        det = x3 * y2 - x2 * y3
+        if det == 0:
+            return []
+        r = (x2 * y1 - x1 * y2) / det  # t1^2 + t1 t2 + t2^2
+        s = (x1 * y3 - x3 * y1) / det  # t1 + t2
+        p = s * s - r  # t1 t2
+        m = s / 2
+        if m * m <= p:
+            return []
+        root = (m * m - p) ** 0.5
+        if m < root or m > root + 1:
+            return []
+
+        # TODO: It might be more useful to return the t values.
+        return [self(m - root)]
 
 
 def intersect(a: Bezier, b: Bezier) -> List[Point]:

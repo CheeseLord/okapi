@@ -77,6 +77,9 @@ class Canvas(QtWidgets.QWidget):
         path.cubicTo(*self.curve.p1, *self.curve.p2, *self.curve.p3)
         painter.drawPath(path)
 
+        for (x, y) in self.curve.selfIntersections:
+            painter.drawRect(x - 5, y - 5, 10, 10)
+
         left, right = self.curve.split(0.3)
         offset = np.array([0, 100])
         left.p0 += offset
