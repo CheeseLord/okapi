@@ -27,12 +27,8 @@ class Bezier:
         """
 
         # TODO: Make this work with an array of t values.
-        return (
-            (1 - t) ** 3 * self.p0
-            + 3 * t * (1 - t) ** 2 * self.p1
-            + 3 * t ** 2 * (1 - t) * self.p2
-            + t ** 3 * self.p3
-        )
+        a0, a1, a2, a3 = self.coefficients
+        return (a0 + t * (a1 + t * (a2 + t * a3)))
 
     @classmethod
     def fromPoints(
@@ -66,13 +62,10 @@ class Bezier:
         Get the t value for a given point on a bezier curve.
         """
 
-        x, y = p
+        # TODO: This divides by 0 at self-intersection points.
 
-        # Get the coefficients of each power of t.
-        x0, y0 = self.p0
-        x1, y1 = 3 * self.p1 - 3 * self.p0
-        x2, y2 = 3 * self.p2 - 6 * self.p1 + 3 * self.p0
-        x3, y3 = self.p3 - 3 * self.p2 + 3 * self.p1 - self.p0
+        x, y = p
+        (x0, y0), (x1, y1), (x2, y2), (x3, y3) = self.coefficients
 
         # The inverse of a bezier curve is a ratio of linear terms.
         arr = np.array([
@@ -133,6 +126,16 @@ class Bezier:
 
         # TODO: This is an awkward shape.
         return ((xMin, xMax), (yMin, yMax))
+
+    @property
+    def coefficients(self) -> Tuple[np.ndarray]:
+        # A point can be represented as a0 + a1 t + a2 t^2 + a3 t^3.
+        return (
+            self.p0,
+            3 * self.p1 - 3 * self.p0,
+            3 * self.p2 - 6 * self.p1 + 3 * self.p0,
+            self.p3 - 3 * self.p2 + 3 * self.p1 - self.p0,
+        )
 
     @property
     def selfIntersections(self) -> List[Point]:
