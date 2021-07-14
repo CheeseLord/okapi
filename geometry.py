@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.typing import ArrayLike
+from scipy.linalg import null_space
 from typing import List, Tuple
 
 
@@ -59,6 +60,40 @@ class Bezier:
 
         return cls(p0, p1, p2, p3)
 
+
+    def getT(self, p: ArrayLike) -> float:
+        """
+        Get the t value for a given point on a bezier curve.
+        """
+
+        x, y = p
+
+        # Get the coefficients of each power of t.
+        x0, y0 = self.p0
+        x1, y1 = 3 * self.p1 - 3 * self.p0
+        x2, y2 = 3 * self.p2 - 6 * self.p1 + 3 * self.p0
+        x3, y3 = self.p3 - 3 * self.p2 + 3 * self.p1 - self.p0
+
+        # The inverse of a bezier curve is a ratio of linear terms.
+        arr = np.array([
+            [x3, y3,  0,   0,   0,  0],
+            [x2, y2,  0, -x3, -y3,  0],
+            [x1, y1,  0, -x2, -y2,  0],
+            [x0, y0,  1, -x1, -y1,  0],
+            [ 0,  0,  0, -x0, -y0, -1],
+        ])
+        # TODO: Cache this.
+        a2, b2, c2, a1, b1, c1 = null_space(arr)[:, 0]
+        return (a1 * x + b1 * y + c1) / (a2 * x + b2 * y + c2)
+
+    def nearestPoint(self, p: ArrayLike) -> Point:
+        """
+        Find the nearest point on a bezier curve to a given point.
+        """
+
+        # FIXME: Write this.
+        pass
+
     def split(self, t: float) -> Tuple['Bezier', 'Bezier']:
         """
         Split a bezier curve at a point.
@@ -92,12 +127,17 @@ class Bezier:
     def boundingBox(self) -> Tuple[Tuple[float, float], Tuple[float, float]]:
         # A bezier curve is a convex linear combination of control points, so
         # the control points give a bounding box (not tight).
-
         control = [self.p0, self.p1, self.p2, self.p3]
         xMin, yMin = np.min(control, axis=0)
         xMax, yMax = np.max(control, axis=0)
 
+        # TODO: This is an awkward shape.
         return ((xMin, xMax), (yMin, yMax))
+
+    @property
+    def selfIntersections(self) -> List[Point]:
+        # FIXME: Write this.
+        pass
 
 
 def intersect(a: Bezier, b: Bezier) -> List[Point]:

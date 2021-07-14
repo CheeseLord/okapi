@@ -95,6 +95,9 @@ class Canvas(QtWidgets.QWidget):
         painter.drawPath(path)
         for x, y in intersect(self.curve, left):
             painter.drawRect(x - 5, y - 5, 10, 10)
+            t = self.curve.getT([x, y])
+            x_, y_ = self.curve(t)
+            painter.drawRect(x_ - 3, y_ - 3, 6, 6)
 
         painter.setPen(QtCore.Qt.green)
         path = QtGui.QPainterPath()
