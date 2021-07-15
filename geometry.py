@@ -117,15 +117,46 @@ class Bezier:
         return (a, b)
 
     @property
-    def boundingBox(self) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+    def boundingBox(self) -> Tuple[float, float, float, float]:
         # A bezier curve is a convex linear combination of control points, so
-        # the control points give a bounding box (not tight).
-        control = [self.p0, self.p1, self.p2, self.p3]
-        xMin, yMin = np.min(control, axis=0)
-        xMax, yMax = np.max(control, axis=0)
+        # the control points give a loose bounding box.
+        points = [self.p0, self.p1, self.p2, self.p3]
+        xMin, yMin = np.min(points, axis=0)
+        xMax, yMax = np.max(points, axis=0)
 
-        # TODO: This is an awkward shape.
-        return ((xMin, xMax), (yMin, yMax))
+        return xMin, xMax, yMin, yMax
+
+    @property
+    def boundingBoxTight(self) -> Tuple[float, float, float, float]:
+        points = [self.p0, self.p3]
+
+        # Find points with dx/dt = 0 or dy/dt = 0.
+        _a0, (x1, y1), (x2, y2), (x3, y3) = self.coefficients
+        if x3 != 0:
+            disc = x2 * x2 - 3 * x1 * x3
+            if disc >= 0:
+                root = disc ** 0.5
+                t1 = (-x2 + root) / (3 * x3)
+                t2 = (-x2 - root) / (3 * x3)
+                if 0 < t1 < 1:
+                    points.append(self(t1))
+                if 0 < t2 < 1:
+                    points.append(self(t2))
+        if y3 != 0:
+            disc = y2 * y2 - 3 * y1 * y3
+            if disc >= 0:
+                root = disc ** 0.5
+                t1 = (-y2 + root) / (3 * y3)
+                t2 = (-y2 - root) / (3 * y3)
+                if 0 < t1 < 1:
+                    points.append(self(t1))
+                if 0 < t2 < 1:
+                    points.append(self(t2))
+
+        xMin, yMin = np.min(points, axis=0)
+        xMax, yMax = np.max(points, axis=0)
+
+        return xMin, xMax, yMin, yMax
 
     @property
     def coefficients(self) -> Tuple[np.ndarray]:
@@ -166,8 +197,8 @@ def intersect(a: Bezier, b: Bezier) -> List[Point]:
 
     # TODO: This fails when the two curves are the same.
 
-    (aXMin, aXMax), (aYMin, aYMax) = a.boundingBox
-    (bXMin, bXMax), (bYMin, bYMax) = b.boundingBox
+    aXMin, aXMax, aYMin, aYMax = a.boundingBox
+    bXMin, bXMax, bYMin, bYMax = b.boundingBox
 
     # If the bounding boxes don't intersect, the curves can't either.
     if (aXMin > bXMax or aXMax < bXMin or aYMin > bYMax or aYMax < bYMin):

@@ -80,6 +80,10 @@ class Canvas(QtWidgets.QWidget):
         for (x, y) in self.curve.selfIntersections:
             painter.drawRect(x - 5, y - 5, 10, 10)
 
+        xMin, xMax, yMin, yMax = self.curve.boundingBoxTight
+        painter.setPen(QtCore.Qt.black)
+        painter.drawRect(xMin, yMin, xMax - xMin, yMax - yMin)
+
         left, right = self.curve.split(0.3)
         offset = np.array([0, 100])
         left.p0 += offset
