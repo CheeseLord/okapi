@@ -210,11 +210,12 @@ class Bezier:
         if m * m <= p:
             return []
         root = (m * m - p) ** 0.5
-        if m < root or m > root + 1:
-            return []
-
-        # TODO: It might be more useful to return the t values.
-        return [self(m - root)]
+        t1 = m - root
+        t2 = m + root
+        if 0 <= t1 <= 1 and 0 <= t2 <= 1:
+            # TODO: It might be more useful to return the t values.
+            return [self(t1)]
+        return []
 
 
 def intersect(a: Bezier, b: Bezier) -> List[Point]:
