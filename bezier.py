@@ -84,8 +84,35 @@ class Bezier:
         Find the nearest point on a bezier curve to a given point.
         """
 
-        # FIXME: Write this.
-        pass
+        x, y = p
+        (x0, y0), (x1, y1), (x2, y2), (x3, y3) = self.coefficients
+        x0 -= x
+        y0 -= y
+
+        # Minimize x(t)^2 + y(t)^2.
+        possible = np.polynomial.polynomial.polyroots([
+            x0 * x1 + y0 * y1,
+            2 * x0 * x2 + x1 * x1 + 2 * y0 * y2 + y1 * y1,
+            3 * x0 * x3 + 3 * x1 * x2 + 3 * y0 * y3 + 3 * y1 * y2,
+            4 * x1 * x3 + 2 * x2 * x2 + 4 * y1 * y3 + 2 * y2 * y2,
+            5 * x2 * x3 + 5 * y2 * y3,
+            3 * x3 * x3 + 3 * y3 * y3,
+        ]).tolist() + [0, 1]
+
+        # Find the nearest root to the point.
+        bestPoint = self.p0
+        bestDist = np.inf
+        for t in possible:
+            t = np.real(t)
+            if 0 <= t <= 1:
+                point = self(t)
+                dist = np.hypot(*(point - p))
+                if dist < bestDist:
+                    bestPoint = point
+                    bestDist = dist
+
+        # TODO: It might be more useful to return the t value.
+        return bestPoint
 
     def split(self, t: float) -> Tuple['Bezier', 'Bezier']:
         """
@@ -114,7 +141,7 @@ class Bezier:
             self.p3,
         )
 
-        return (a, b)
+        return a, b
 
     @property
     def boundingBox(self) -> Tuple[float, float, float, float]:
@@ -133,9 +160,9 @@ class Bezier:
         # Find points with dx/dt = 0 or dy/dt = 0.
         _a0, (x1, y1), (x2, y2), (x3, y3) = self.coefficients
         if x3 != 0:
-            disc = x2 * x2 - 3 * x1 * x3
-            if disc >= 0:
-                root = disc ** 0.5
+            discriminant = x2 * x2 - 3 * x1 * x3
+            if discriminant >= 0:
+                root = discriminant ** 0.5
                 t1 = (-x2 + root) / (3 * x3)
                 t2 = (-x2 - root) / (3 * x3)
                 if 0 < t1 < 1:
@@ -143,9 +170,9 @@ class Bezier:
                 if 0 < t2 < 1:
                     points.append(self(t2))
         if y3 != 0:
-            disc = y2 * y2 - 3 * y1 * y3
-            if disc >= 0:
-                root = disc ** 0.5
+            discriminant = y2 * y2 - 3 * y1 * y3
+            if discriminant >= 0:
+                root = discriminant ** 0.5
                 t1 = (-y2 + root) / (3 * y3)
                 t2 = (-y2 - root) / (3 * y3)
                 if 0 < t1 < 1:
@@ -159,14 +186,14 @@ class Bezier:
         return xMin, xMax, yMin, yMax
 
     @property
-    def coefficients(self) -> Tuple[np.ndarray]:
+    def coefficients(self) -> np.ndarray:
         # A point can be represented as a0 + a1 t + a2 t^2 + a3 t^3.
-        return (
+        return np.array([
             self.p0,
             3 * self.p1 - 3 * self.p0,
             3 * self.p2 - 6 * self.p1 + 3 * self.p0,
             self.p3 - 3 * self.p2 + 3 * self.p1 - self.p0,
-        )
+        ])
 
     @property
     def selfIntersections(self) -> List[Point]:

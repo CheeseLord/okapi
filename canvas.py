@@ -1,7 +1,7 @@
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from geometry import Bezier, intersect
+from bezier import Bezier, intersect
 
 NUM_SEGMENTS = 1000
 MAX_DISTANCE = 20
@@ -80,6 +80,7 @@ class Canvas(QtWidgets.QWidget):
         for (x, y) in self.curve.selfIntersections:
             painter.drawRect(x - 5, y - 5, 10, 10)
 
+
         xMin, xMax, yMin, yMax = self.curve.boundingBoxTight
         painter.setPen(QtCore.Qt.black)
         painter.drawRect(xMin, yMin, xMax - xMin, yMax - yMin)
@@ -113,4 +114,8 @@ class Canvas(QtWidgets.QWidget):
         painter.drawPath(path)
         for x, y in intersect(self.curve, right):
             painter.drawRect(x - 5, y - 5, 10, 10)
+
+        x, y = self.curve.nearestPoint(right.p3)
+        painter.setPen(QtCore.Qt.magenta)
+        painter.drawRect(x - 5, y - 5, 10, 10)
 
