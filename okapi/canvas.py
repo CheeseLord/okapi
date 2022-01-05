@@ -119,3 +119,11 @@ class Canvas(QtWidgets.QWidget):
         painter.setPen(QtCore.Qt.magenta)
         painter.drawRect(x - 5, y - 5, 10, 10)
 
+        painter.setPen(QtCore.Qt.cyan)
+        painter.setBrush(QtCore.Qt.black)
+        path = QtGui.QPainterPath()
+        path.addEllipse(100, 20, 50, 50)
+        path.addEllipse(110, 30, 30, 30)
+        path.addEllipse(120, 40, 10, 10)
+        painter.drawPath(path)
+
