@@ -14,7 +14,13 @@ class Canvas(QtWidgets.QWidget):
 
     def mousePressEvent(self, event):
         mousePos = np.array([event.localPos().x(), event.localPos().y()])
-        self.line.onClick(mousePos)
+        self.line.onPress(mousePos)
+
+        self.repaint()
+
+    def mouseReleaseEvent(self, event):
+        mousePos = np.array([event.localPos().x(), event.localPos().y()])
+        self.line.onRelease(mousePos)
 
         self.repaint()
 

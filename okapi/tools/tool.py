@@ -8,6 +8,9 @@ class Tool:
         self.frame = frame
 
     # TODO: Figure out the right events.
-    def onClick(self, point: Point):
-        raise NotImplementedError
+    def onPress(self, point: Point):
+        pass
+
+    def onRelease(self, point: Point):
+        pass
 
