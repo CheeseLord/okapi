@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from okapi.frame import Frame
 from okapi.tools.line import Line
+from okapi.ui import parseModifiers
 
 
 class Canvas(QtWidgets.QWidget):
@@ -14,14 +15,24 @@ class Canvas(QtWidgets.QWidget):
 
     def mousePressEvent(self, event):
         mousePos = np.array([event.localPos().x(), event.localPos().y()])
-        self.line.onPress(mousePos)
+        modifiers = parseModifiers(event.modifiers())
+        self.line.onMousePress(mousePos, modifiers)
 
         self.repaint()
 
     def mouseReleaseEvent(self, event):
         mousePos = np.array([event.localPos().x(), event.localPos().y()])
-        self.line.onRelease(mousePos)
+        modifiers = parseModifiers(event.modifiers())
+        self.line.onMouseRelease(mousePos, modifiers)
 
+        self.repaint()
+
+    def mouseMoveEvent(self, event):
+        mousePos = np.array([event.localPos().x(), event.localPos().y()])
+        modifiers = parseModifiers(event.modifiers())
+        self.line.onMouseMove(mousePos, modifiers)
+
+        # FIXME: Only repaint when something happens.
         self.repaint()
 
     def paintEvent(self, event):
