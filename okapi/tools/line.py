@@ -15,36 +15,50 @@ class Line(Tool):
 
         self.previousPoint = None
 
+        self.justClicked = False
+
     def onMousePress(self, point: Point, modifiers: Modifiers):
-        if self.previousPoint is None:
-            self.previousPoint = point
-        else:
-            target = self._getTarget(point, modifiers)
-            self.frame.curves.append(Bezier(
-                self.previousPoint,
-                (2 * self.previousPoint + target) / 3,
-                (self.previousPoint + 2 * target) / 3,
-                target,
-            ))
+        if self.previousPoint is not None:
+            self.frame.curves += self.frame.active
+            self.frame.active = []
             self.previousPoint = None
+
+        else:
+            self.justClicked = True
+            self.previousPoint = point
 
     def onMouseRelease(self, point: Point, modifiers: Modifiers):
         if self.previousPoint is None:
             return
+        if self.justClicked:
+            self.justClicked = False
+            return
 
-        if np.hypot(*(point - self.previousPoint)) > DRAG_DISTANCE:
-            target = self._getTarget(point, modifiers)
-            self.frame.curves.append(Bezier(
-                self.previousPoint,
-                (2 * self.previousPoint + target) / 3,
-                (self.previousPoint + 2 * target) / 3,
-                target,
-            ))
-            self.previousPoint = None
+        self.frame.curves += self.frame.active
+        self.frame.active = []
+        self.previousPoint = None
 
     def onMouseMove(self, point: Point, modifiers: Modifiers):
-        # FIXME: Write this.
-        pass
+        if self.previousPoint is None:
+            return
+
+        target = self._getTarget(point, modifiers)
+        curve = Bezier(
+            self.previousPoint,
+            (2 * self.previousPoint + target) / 3,
+            (self.previousPoint + 2 * target) / 3,
+            target,
+        )
+
+        if (
+            not self.frame.active and
+            np.hypot(*(point - self.previousPoint)) > DRAG_DISTANCE
+        ):
+            self.justClicked = False
+            self.frame.active.append(curve)
+
+        if self.frame.active:
+            self.frame.active[0] = curve
 
     def _getTarget(self, point: Point, modifiers: Modifiers):
         if modifiers.shift:

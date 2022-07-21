@@ -13,6 +13,8 @@ class Canvas(QtWidgets.QWidget):
         self.frame = Frame()
         self.line = Line(self.frame)
 
+        self.setMouseTracking(True)
+
     def mousePressEvent(self, event):
         mousePos = np.array([event.localPos().x(), event.localPos().y()])
         modifiers = parseModifiers(event.modifiers())
@@ -39,7 +41,16 @@ class Canvas(QtWidgets.QWidget):
         painter = QtGui.QPainter(self)
 
         for curve in self.frame.curves:
+            if curve in self.frame.active:
+                continue
             painter.setPen(QtCore.Qt.red)
+            path = QtGui.QPainterPath()
+            path.moveTo(*curve.p0)
+            path.cubicTo(*curve.p1, *curve.p2, *curve.p3)
+            painter.drawPath(path)
+
+        for curve in self.frame.active:
+            painter.setPen(QtCore.Qt.blue)
             path = QtGui.QPainterPath()
             path.moveTo(*curve.p0)
             path.cubicTo(*curve.p1, *curve.p2, *curve.p3)
