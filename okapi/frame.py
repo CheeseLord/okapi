@@ -7,3 +7,8 @@ class Frame:
         # TODO: Multiple layers.
         # TODO: Spatial partitioning.
 
+    def deactivateAll(self):
+        # FIXME: Handle intersections and self-intersections.
+        self.curves += self.active
+        self.active = []
+

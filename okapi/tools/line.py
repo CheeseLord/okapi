@@ -19,8 +19,7 @@ class Line(Tool):
 
     def onMousePress(self, point: Point, modifiers: Modifiers):
         if self.previousPoint is not None:
-            self.frame.curves += self.frame.active
-            self.frame.active = []
+            self.frame.deactivateAll()
             self.previousPoint = None
 
         else:
@@ -34,8 +33,9 @@ class Line(Tool):
             self.justClicked = False
             return
 
-        self.frame.curves += self.frame.active
-        self.frame.active = []
+        # FIXME: Handle short move.
+
+        self.frame.deactivateAll()
         self.previousPoint = None
 
     def onMouseMove(self, point: Point, modifiers: Modifiers):

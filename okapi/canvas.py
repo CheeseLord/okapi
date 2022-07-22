@@ -40,17 +40,25 @@ class Canvas(QtWidgets.QWidget):
     def paintEvent(self, event):
         painter = QtGui.QPainter(self)
 
-        for curve in self.frame.curves:
+        for i, curve in enumerate(self.frame.curves):
             if curve in self.frame.active:
                 continue
-            painter.setPen(QtCore.Qt.red)
+            colors = [
+                QtCore.Qt.red,
+                QtCore.Qt.yellow,
+                QtCore.Qt.green,
+                QtCore.Qt.cyan,
+                QtCore.Qt.blue,
+                QtCore.Qt.magenta,
+            ]
+            painter.setPen(colors[i % 6])
             path = QtGui.QPainterPath()
             path.moveTo(*curve.p0)
             path.cubicTo(*curve.p1, *curve.p2, *curve.p3)
             painter.drawPath(path)
 
         for curve in self.frame.active:
-            painter.setPen(QtCore.Qt.blue)
+            painter.setPen(QtCore.Qt.black)
             path = QtGui.QPainterPath()
             path.moveTo(*curve.p0)
             path.cubicTo(*curve.p1, *curve.p2, *curve.p3)

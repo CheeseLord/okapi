@@ -196,7 +196,7 @@ class Bezier:
         ])
 
     @property
-    def selfIntersections(self) -> List[Point]:
+    def selfIntersections(self) -> List[float]:
         _a0, (x1, y1), (x2, y2), (x3, y3) = self.coefficients
 
         # Solve B(t1) = B(t2).
@@ -213,8 +213,7 @@ class Bezier:
         t1 = m - root
         t2 = m + root
         if 0 <= t1 <= 1 and 0 <= t2 <= 1:
-            # TODO: It might be more useful to return the t values.
-            return [self(t1)]
+            return [t1, t2]
         return []
 
 
@@ -223,7 +222,7 @@ def intersect(a: Bezier, b: Bezier) -> List[Point]:
     Find the intersection of two bezier curves.
     """
 
-    # TODO: This fails when the two curves are the same.
+    # TODO: This fails when the two curves are the same or overlap.
 
     aXMin, aXMax, aYMin, aYMax = a.boundingBox
     bXMin, bXMax, bYMin, bYMax = b.boundingBox
