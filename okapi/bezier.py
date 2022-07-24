@@ -114,34 +114,43 @@ class Bezier:
         # TODO: It might be more useful to return the t value.
         return bestPoint
 
-    def split(self, t: float) -> Tuple['Bezier', 'Bezier']:
+    def split(self, ts: List[float]) -> List['Bezier']:
         """
-        Split a bezier curve at a point.
+        Split a bezier curve at a series of points.
         """
 
-        # Use the de Casteljau algorithm.
-        a = Bezier(
-            self.p0,
-            (1 - t) * self.p0 + t * self.p1,
-            (
-                (1 - t) ** 2 * self.p0
-                + 2 * t * (1 - t) * self.p1
-                + t ** 2 * self.p2
-            ),
-            self(t),
-        )
-        b = Bezier(
-            self(t),
-            (
-                (1 - t) ** 2 * self.p1
-                + 2 * t * (1 - t) * self.p2
-                + t ** 2 * self.p3
-            ),
-            (1 - t) * self.p2 + t * self.p3,
-            self.p3,
-        )
+        ts = sorted(t for t in set(ts) if 0 < t < 1)
 
-        return a, b
+        parts = []
+        current = self
+        while ts:
+            t = ts[0]
+
+            # Use the de Casteljau algorithm.
+            parts.append(Bezier(
+                current.p0,
+                (1 - t) * current.p0 + t * current.p1,
+                (
+                    (1 - t) ** 2 * current.p0
+                    + 2 * t * (1 - t) * current.p1
+                    + t ** 2 * current.p2
+                ),
+                current(t),
+            ))
+            current = Bezier(
+                current(t),
+                (
+                    (1 - t) ** 2 * current.p1
+                    + 2 * t * (1 - t) * current.p2
+                    + t ** 2 * current.p3
+                ),
+                (1 - t) * current.p2 + t * current.p3,
+                current.p3,
+            )
+            ts = [(u - t) / (1 - t) for u in ts[1:]]
+
+        parts.append(current)
+        return parts
 
     @property
     def boundingBox(self) -> Tuple[float, float, float, float]:
@@ -240,8 +249,8 @@ def intersect(a: Bezier, b: Bezier) -> List[Point]:
         return [np.array([aXMin + aXMax, aYMin + aYMax]) / 2]
 
     # Otherwise, split each curve in half and recurse.
-    aStart, aEnd = a.split(0.5)
-    bStart, bEnd = b.split(0.5)
+    aStart, aEnd = a.split([0.5])
+    bStart, bEnd = b.split([0.5])
     return (
         intersect(aStart, bStart)
         + intersect(aStart, bEnd)

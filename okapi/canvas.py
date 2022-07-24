@@ -45,11 +45,11 @@ class Canvas(QtWidgets.QWidget):
                 continue
             colors = [
                 QtCore.Qt.red,
-                QtCore.Qt.yellow,
-                QtCore.Qt.green,
-                QtCore.Qt.cyan,
-                QtCore.Qt.blue,
                 QtCore.Qt.magenta,
+                QtCore.Qt.blue,
+                QtCore.Qt.cyan,
+                QtCore.Qt.green,
+                QtCore.Qt.yellow,
             ]
             painter.setPen(colors[i % 6])
             path = QtGui.QPainterPath()
