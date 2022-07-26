@@ -2,7 +2,7 @@ import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from okapi.frame import Frame
-from okapi.tools.line import Line
+from okapi.tools.curve import Curve
 from okapi.ui import parseModifiers
 
 
@@ -11,28 +11,30 @@ class Canvas(QtWidgets.QWidget):
         super().__init__()
 
         self.frame = Frame()
-        self.line = Line(self.frame)
+        self.curve = Curve(self.frame)
+
+        self.currentTool = self.curve
 
         self.setMouseTracking(True)
 
     def mousePressEvent(self, event):
         mousePos = np.array([event.localPos().x(), event.localPos().y()])
         modifiers = parseModifiers(event.modifiers())
-        self.line.onMousePress(mousePos, modifiers)
+        self.currentTool.onMousePress(mousePos, modifiers)
 
         self.repaint()
 
     def mouseReleaseEvent(self, event):
         mousePos = np.array([event.localPos().x(), event.localPos().y()])
         modifiers = parseModifiers(event.modifiers())
-        self.line.onMouseRelease(mousePos, modifiers)
+        self.currentTool.onMouseRelease(mousePos, modifiers)
 
         self.repaint()
 
     def mouseMoveEvent(self, event):
         mousePos = np.array([event.localPos().x(), event.localPos().y()])
         modifiers = parseModifiers(event.modifiers())
-        self.line.onMouseMove(mousePos, modifiers)
+        self.currentTool.onMouseMove(mousePos, modifiers)
 
         # FIXME: Only repaint when something happens.
         self.repaint()

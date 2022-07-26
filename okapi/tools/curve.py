@@ -9,7 +9,7 @@ from okapi.ui import Modifiers
 DRAG_DISTANCE = 2
 
 
-class Line(Tool):
+class Curve(Tool):
     def __init__(self, frame: Frame):
         super().__init__(frame)
 
