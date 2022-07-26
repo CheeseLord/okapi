@@ -240,6 +240,18 @@ def intersect(a: Bezier, b: Bezier) -> List[Point]:
     if (aXMin > bXMax or aXMax < bXMin or aYMin > bYMax or aYMax < bYMin):
         return []
 
+    # If the curves are vertical and horizontal lines, compute directly.
+    if (
+        abs(aXMax - aXMin) < INTERSECT_PRECISION
+        and abs(bYMax - bYMin) < INTERSECT_PRECISION
+    ):
+        return [np.array([aXMin, bYMin])]
+    if (
+        abs(bXMax - bXMin) < INTERSECT_PRECISION
+        and abs(aYMax - aYMin) < INTERSECT_PRECISION
+    ):
+        return [np.array([bXMin, aYMin])]
+
     # If the boxes are small enough, the curves intersect.
     if (
         (aXMax - aXMin) * (aYMax - aYMin)
