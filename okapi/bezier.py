@@ -4,7 +4,7 @@ from scipy.linalg import null_space
 from typing import List, Tuple
 
 
-INTERSECT_PRECISION = 1e-8
+INTERSECT_PRECISION = 1e-5
 
 
 # TODO: This will probably need to be a real class eventually.
@@ -244,17 +244,27 @@ def intersect(a: Bezier, b: Bezier) -> List[Point]:
     if (
         (aXMax - aXMin) * (aYMax - aYMin)
         + (bXMax - bXMin) * (bYMax - bYMin)
-    ) < INTERSECT_PRECISION:
+    ) < INTERSECT_PRECISION ** 2:
         # TODO: We could probably do better if we used b.
         return [np.array([aXMin + aXMax, aYMin + aYMax]) / 2]
 
     # Otherwise, split each curve in half and recurse.
     aStart, aEnd = a.split([0.5])
     bStart, bEnd = b.split([0.5])
-    return (
+    points = (
         intersect(aStart, bStart)
         + intersect(aStart, bEnd)
         + intersect(aEnd, bStart)
         + intersect(aEnd, bEnd)
     )
+
+    # Filter out multiple nearby points.
+    valid = []
+    for p in points:
+        for v in valid:
+            if np.hypot(*(p - v) < INTERSECT_PRECISION):
+                break
+        else:
+            valid.append(p)
+    return valid
 

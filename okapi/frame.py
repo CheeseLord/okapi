@@ -24,7 +24,7 @@ class Frame:
         for i, curve in enumerate(self.curves):
             for j, active_ in enumerate(self.active):
                 points = intersect(curve, active_)
-                # TODO: Handle t values close together.
+                # TODO: Handle t values close together (anchor points).
                 curvesInts[i] += [curve.getT(p) for p in points]
                 activeInts[j] += [active_.getT(p) for p in points]
         for i, j in itertools.combinations(range(len(self.active)), 2):
